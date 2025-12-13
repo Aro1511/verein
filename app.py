@@ -6,6 +6,15 @@ from database import init_dateien, lade, speichern, aktualisieren
 st.set_page_config(page_title="Vereinsverwaltung", page_icon="👥", layout="wide")
 st.title("Vereinsverwaltung")
 
+# Logo rechts oben mit neuer Syntax
+col1, col2 = st.columns([3,1])
+
+with col1:
+    st.write("")  # leer
+
+with col2:
+    st.image("logo.png", use_container_width=True)
+
 # Optional: CSS laden, wenn vorhanden
 def load_css(file_name):
     try:
