@@ -3,7 +3,8 @@ import json, os
 DATEIEN = {
     "mitglieder": "mitglieder.json",
     "aktivitaeten": "aktivitaeten.json",
-    "ideen": "ideen.json"
+    "ideen": "ideen.json",
+    "einkommen": "einkommen.json"
 }
 
 def init_dateien():

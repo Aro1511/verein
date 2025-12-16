@@ -2,16 +2,15 @@ import streamlit as st
 from models import Mitglied, Aktivitaet, Idee
 from logic import berechne_beitrag
 from database import init_dateien, lade, speichern, aktualisieren
+from datetime import datetime
 
 st.set_page_config(page_title="Vereinsverwaltung", page_icon="👥", layout="wide")
 st.title("Vereinsverwaltung")
 
 # Logo rechts oben mit neuer Syntax
-col1, col2 = st.columns([3,1])
-
+col1, col2 = st.columns([3, 1])
 with col1:
     st.write("")  # leer
-
 with col2:
     st.image("logo.png", use_container_width=True)
 
@@ -34,13 +33,15 @@ defaults = {
     "show_aktiv_list": False,
     "show_idee_form": False,
     "show_ideen_list": False,
+    "show_einkommen_form": False,
+    "show_einkommen_list": False,
 }
 for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
 # Tabs
-tab_m, tab_a, tab_i = st.tabs(["Mitglieder", "Aktivitäten", "Ideen/Anmerkungen"])
+tab_m, tab_a, tab_i, tab_e = st.tabs(["Mitglieder", "Aktivitäten", "Ideen/Anmerkungen", "Einkommen"])
 
 # --------------------------------------------------------------------
 # Mitglieder
@@ -70,7 +71,6 @@ with tab_m:
                 m = Mitglied(name.strip(), kategorie, beitrag)
                 speichern("mitglieder", {"name": m.name, "kategorie": m.kategorie, "beitrag": m.beitrag})
                 st.success(f"{m.name} gespeichert.")
-                # Formular geschlossen halten oder wieder öffnen? Hier lassen wir es offen.
         if st.button("Formular schließen", key="close_member_form"):
             st.session_state.show_mitglied_form = False
 
@@ -83,7 +83,6 @@ with tab_m:
             for idx, m in enumerate(mitglieder):
                 pseudo = Mitglied(m["name"], m["kategorie"], float(m.get("beitrag", 0)))
                 beitrag_calc = berechne_beitrag(pseudo)
-
                 exp = st.expander(f"👤 {m['name']} | {m['kategorie']} | {beitrag_calc} €", expanded=False)
                 with exp:
                     # Bearbeiten-Form
@@ -112,7 +111,15 @@ with tab_m:
 
                     # Löschen-Button
                     if st.button("Löschen", key=f"delete_member_{idx}"):
-                        neue_liste = [x for x in mitglieder if not (x["name"] == m["name"] and x["kategorie"] == m["kategorie"] and x.get("beitrag", 0) == m.get("beitrag", 0))]
+                        neue_liste = [
+                            x
+                            for x in mitglieder
+                            if not (
+                                x["name"] == m["name"]
+                                and x["kategorie"] == m["kategorie"]
+                                and x.get("beitrag", 0) == m.get("beitrag", 0)
+                            )
+                        ]
                         aktualisieren("mitglieder", neue_liste)
                         st.warning(f"{m['name']} gelöscht.")
 
@@ -167,7 +174,11 @@ with tab_a:
                     with st.form(key=f"form_edit_aktiv_{idx}"):
                         neuer_name = st.text_input("Neuer Name", value=a["name"], key=f"edit_aktiv_name_{idx}")
                         neuer_ort = st.text_input("Neuer Ort", value=a["ort"], key=f"edit_aktiv_ort_{idx}")
-                        neue_teilnehmer_raw = st.text_area("Neue Teilnehmer (Komma)", value=teilnehmer_str, key=f"edit_aktiv_participants_{idx}")
+                        neue_teilnehmer_raw = st.text_area(
+                            "Neue Teilnehmer (Komma)",
+                            value=teilnehmer_str,
+                            key=f"edit_aktiv_participants_{idx}",
+                        )
                         save_edit = st.form_submit_button("Änderungen speichern")
                     if save_edit:
                         a["name"] = neuer_name.strip() or a["name"]
@@ -177,7 +188,9 @@ with tab_a:
                         st.success("Änderungen gespeichert.")
 
                     if st.button("Löschen", key=f"delete_aktiv_{idx}"):
-                        neue_liste = [x for x in aktivitaeten if not (x["name"] == a["name"] and x["ort"] == a["ort"])]
+                        neue_liste = [
+                            x for x in aktivitaeten if not (x["name"] == a["name"] and x["ort"] == a["ort"])
+                        ]
                         aktualisieren("aktivitaeten", neue_liste)
                         st.warning(f"Aktivität '{a['name']}' gelöscht.")
 
@@ -234,9 +247,94 @@ with tab_i:
                         st.success("Änderungen gespeichert.")
 
                     if st.button("Löschen", key=f"delete_idee_{idx}"):
-                        neue_liste = [x for x in ideen if not (x["titel"] == i["titel"] and x["geber"] == i["geber"])]
+                        neue_liste = [
+                            x for x in ideen if not (x["titel"] == i["titel"] and x["geber"] == i["geber"])
+                        ]
                         aktualisieren("ideen", neue_liste)
                         st.warning(f"Idee '{i['titel']}' gelöscht.")
 
         if st.button("Liste schließen", key="close_ideen_list"):
             st.session_state.show_ideen_list = False
+
+# --------------------------------------------------------------------
+# Einkommen
+# --------------------------------------------------------------------
+with tab_e:
+    st.subheader("Einkommen")
+
+    col_btn7, col_btn8 = st.columns(2)
+    with col_btn7:
+        if st.button("➕ Einkommen hinzufügen", key="btn_add_einkommen"):
+            st.session_state.show_einkommen_form = True
+    with col_btn8:
+        if st.button("📋 Einkommenliste anzeigen", key="btn_list_einkommen"):
+            st.session_state.show_einkommen_list = True
+
+    # Formular Einkommen hinzufügen
+    if st.session_state.show_einkommen_form:
+        with st.form(key="form_einkommen_add", clear_on_submit=True):
+            eink_name = st.text_input("Name", key="einkommen_name")
+            eink_art = st.selectbox(
+                "Art des Einkommens",
+                ["Spende", "Monatliche Gebühr", "Geschenk", "Sonstiges"],
+                key="einkommen_art",
+            )
+            eink_betrag = st.number_input("Betrag (€)", min_value=0.0, step=1.0, key="einkommen_betrag")
+            submitted_e = st.form_submit_button("Speichern Einkommen")
+        if submitted_e:
+            if not eink_name.strip():
+                st.error("Bitte einen Namen eingeben.")
+            else:
+                eintrag = {
+                    "name": eink_name.strip(),
+                    "art": eink_art,
+                    "betrag": eink_betrag,
+                    "datum": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+                speichern("einkommen", eintrag)
+                st.success("Einkommen gespeichert.")
+        if st.button("Formular schließen", key="close_einkommen_form"):
+            st.session_state.show_einkommen_form = False
+
+    # Monatsübersicht mit Buttons + Summen
+    if st.session_state.show_einkommen_list:
+        daten = lade("einkommen")
+        if not daten:
+            st.info("Keine Einkommen vorhanden.")
+        else:
+            st.markdown("#### 📆 Monatsübersicht")
+            monate = [
+                "Januar", "Februar", "März", "April", "Mai", "Juni",
+                "Juli", "August", "September", "Oktober", "November", "Dezember"
+            ]
+
+            # Buttons in zwei Reihen
+            cols = st.columns(4)
+            for i, monat in enumerate(monate, start=1):
+                col = cols[(i - 1) % 4]
+                with col:
+                    if st.button(monat, key=f"btn_monat_{i}"):
+                        gefiltert = []
+                        # robustes Parsing (unterstützt beide Formate: mit oder ohne Uhrzeit)
+                        for d in daten:
+                            dt_str = d.get("datum", "")
+                            dt = None
+                            for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+                                try:
+                                    dt = datetime.strptime(dt_str, fmt)
+                                    break
+                                except ValueError:
+                                    continue
+                            if dt and dt.month == i:
+                                gefiltert.append(d)
+
+                        if gefiltert:
+                            st.write(f"### Einnahmen im {monat}")
+                            st.table(gefiltert)
+                            gesamt = sum(float(d.get("betrag", 0) or 0) for d in gefiltert)
+                            st.success(f"Gesamteinnahmen im {monat}: {gesamt:.2f} €")
+                        else:
+                            st.info(f"Keine Einträge für {monat}.")
+
+        if st.button("Liste schließen", key="close_einkommen_list"):
+            st.session_state.show_einkommen_list = False
