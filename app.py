@@ -53,7 +53,7 @@ tab_m, tab_a, tab_i, tab_e, tab_x = st.tabs([
     "Mitglieder",
     "Aktivitäten",
     "Ideen/Anmerkungen",
-    "Einkommen",
+    "einnahme",
     "Ausgaben"   # ✅ NEU
 ])
 
@@ -250,14 +250,14 @@ with tab_i:
 # Einkommen
 # --------------------------------------------------------------------
 with tab_e:
-    st.subheader("Einkommen")
+    st.subheader("einnahme")
 
     col_btn7, col_btn8 = st.columns(2)
     with col_btn7:
-        if st.button("➕ Einkommen hinzufügen"):
+        if st.button("➕ Einnahme hinzufügen"):
             st.session_state.show_einkommen_form = True
     with col_btn8:
-        if st.button("📋 Einkommenliste anzeigen"):
+        if st.button("📋 Einnahmeliste anzeigen"):
             st.session_state.show_einkommen_list = True
 
     if st.session_state.show_einkommen_form:

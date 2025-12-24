@@ -10,5 +10,11 @@
         "art": "Spende",
         "betrag": 201.0,
         "datum": "2025-12-20 23:49:21"
+    },
+    {
+        "name": "Waschmaschine",
+        "art": "Spende",
+        "betrag": 300.0,
+        "datum": "2025-12-24 14:07:22"
     }
 ]
