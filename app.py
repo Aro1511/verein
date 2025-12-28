@@ -1,9 +1,9 @@
 import streamlit as st
 
-# Sprache auf Deutsch setzen
-st.set_page_config(page_title="Maareeyaha Ururka", layout="wide")
+# Seite konfigurieren (nur EINMAL!)
+st.set_page_config(page_title="Vereinsverwaltung", page_icon="👥", layout="wide")
 
-# HTML-Header überschreiben
+# Sprache auf Deutsch setzen
 st.markdown(
     """
     <script>
@@ -24,16 +24,15 @@ from logic import (
 from database import init_dateien, lade, speichern, aktualisieren
 from datetime import datetime
 
-st.set_page_config(page_title="Vereinsverwaltung", page_icon="👥", layout="wide")
-
-
 # Logo
 col1, col2 = st.columns([3, 1])
 with col1:
     st.write("Vereinsverwaltung")
 with col2:
     st.image("logo.png", use_container_width=True)
+
 st.title("Vereinsverwaltung")
+
 # CSS laden
 def load_css(file_name):
     try:
