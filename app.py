@@ -136,7 +136,7 @@ with tab_m:
                         aktualisieren("mitglieder", neue_liste)
                         st.warning(f"{m.name} gelöscht.")
 
-        if st.button("Liste schließen"):
+        if st.button("Liste schließen", key="close_mitglieder"):
             st.session_state.show_mitglieder_list = False
 
 # --------------------------------------------------------------------
@@ -200,7 +200,7 @@ with tab_a:
                         aktualisieren("aktivitaeten", neue_liste)
                         st.warning(f"Aktivität '{a.name}' gelöscht.")
 
-        if st.button("Liste schließen"):
+        if st.button("Liste schließen", key="close_aktiv"):
             st.session_state.show_aktiv_list = False
 
 # --------------------------------------------------------------------
