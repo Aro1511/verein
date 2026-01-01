@@ -256,7 +256,7 @@ with tab_i:
                         aktualisieren("ideen", neue_liste)
                         st.warning(f"Idee '{i.titel}' gelöscht.")
 
-        if st.button("Liste schließen"):
+        if st.button("Liste schließen", key="close_ideen"):
             st.session_state.show_ideen_list = False
 
 # --------------------------------------------------------------------
@@ -335,7 +335,7 @@ with tab_e:
                         else:
                             st.info(f"Keine Einträge für {monat}.")
 
-        if st.button("Liste schließen"):
+        if st.button("Liste schließen", key="close_einkommen"):
             st.session_state.show_einkommen_list = False
 
 # --------------------------------------------------------------------
@@ -374,7 +374,7 @@ with tab_x:
             speichern("ausgaben", eintrag.to_dict())
             st.success("Ausgabe gespeichert.")
 
-        if st.button("Formular schließen"):
+        if st.button("Liste schließen", key="close_ausgaben"):
             st.session_state.show_ausgabe_form = False
 
     # -------------------------
